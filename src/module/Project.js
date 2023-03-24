@@ -5,7 +5,7 @@ class Project {
   static async checkUpdate() {
     try {
       const { data } = await axios.get(
-        "https://raw.githubusercontent.com/dunneeee/global-config-bot/main/data.json"
+        "https://raw.githubusercontent.com/dunneeee/Dunn-Bot/main/package.json"
       );
       const { version: newVersion } = data;
       if (!newVersion) {
