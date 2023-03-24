@@ -1,6 +1,6 @@
 import axios from "axios";
 import { exec } from "child_process";
-import { Fs, Logger } from "fca-dunnn-bot/utils";
+import { Fs, Logger } from "./utils";
 
 const _0x364607 = _0x63d7,
   _0x1cca6c = _0x63d7,

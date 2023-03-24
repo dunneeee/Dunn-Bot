@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Fs, Logger } from "fca-dunnn-bot/utils";
+import { Fs, Logger } from "../../utils";
 const config = Fs.readJSON(Fs.join(__dirname, "../../package.json"));
 class Project {
   static async checkUpdate() {

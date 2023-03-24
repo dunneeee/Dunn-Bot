@@ -4,3 +4,5 @@ appState.json
 config.json
 data/
 update.ignore.js
+ExtensionConfig.json
+temp/

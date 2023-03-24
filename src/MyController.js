@@ -1,6 +1,6 @@
 import { Command, Controller, Event } from "fca-dunnn-bot";
 import { Facebook, Project } from "./module";
-import { Fs, Logger } from "fca-dunnn-bot/utils";
+import { Fs, Logger } from "../utils";
 import fs from "fs";
 import { Fca } from "fca-dunnn-bot/src/namespaces/Fca";
 import MyAuthen from "./MyAuthen";
@@ -31,11 +31,15 @@ class MyController extends Controller {
     }
     const pCommand = Fs.join(__dirname, "./commands");
     const pEvent = Fs.join(__dirname, "./events");
+    const pExtension = Fs.join(__dirname, "../ExtensionConfig.json");
     if (!Fs.existsSync(pCommand)) {
       Fs.mkdirSync(pCommand);
     }
     if (!Fs.existsSync(pEvent)) {
       Fs.mkdirSync(pEvent);
+    }
+    if (!Fs.existsSync(pExtension)) {
+      Fs.writeJSON(pExtension, {});
     }
     const commandCount = this.loadCommand(pCommand);
     const eventCount = this.loadEvent(pEvent);
@@ -52,19 +56,24 @@ class MyController extends Controller {
         !file.includes("example") &&
         !file.includes("index")
       ) {
-        /**
-         * @type {Command}
-         */
-        const command = require(Fs.join(pCommand, file)).default;
-        if (!command.name) {
-          Logger.error(`Lỗi khi load lệnh ${file}: Không có thuộc tính name`);
-        }
-        const res = this.commands.add(command);
-        if (res) {
-          Logger.info(`Đã load thành công lệnh ${command.name} --> ${file}`);
-          cout++;
-        } else {
-          Logger.error(`Lỗi khi load lệnh ${file}: Lệnh đã tồn tại!`);
+        try {
+          /**
+           * @type {Command}
+           */
+          const command = require(Fs.join(pCommand, file)).default;
+          if (!command.name) {
+            Logger.error(`Lỗi khi load lệnh ${file}: Không có thuộc tính name`);
+          }
+          const res = this.commands.add(command);
+          if (res) {
+            Logger.info(`Đã load thành công lệnh ${command.name} --> ${file}`);
+            cout++;
+          } else {
+            Logger.error(`Lỗi khi load lệnh ${file}: Lệnh đã tồn tại!`);
+          }
+        } catch (e) {
+          Logger.error(`Lỗi khi load lệnh ${file}: ${e.message}`);
+          Logger.log(e);
         }
       }
     }
@@ -79,21 +88,26 @@ class MyController extends Controller {
         !file.includes("example") &&
         !file.includes("index")
       ) {
-        /**
-         * @type {Event}
-         */
-        const event = require(Fs.join(pEvent, file)).default;
-        if (!event.name) {
-          Logger.error(
-            `Lỗi khi load sự kiện ${file}: Không có thuộc tính name`
-          );
-        }
-        const res = this.events.add(event);
-        if (!res) {
-          Logger.error(`Lỗi khi load sự kiện ${file}: Sự kiện đã tồn tại!`);
-        } else {
-          Logger.info(`Đã load thành công sự kiện ${event.name} --> ${file}`);
-          cout++;
+        try {
+          /**
+           * @type {Event}
+           */
+          const event = require(Fs.join(pEvent, file)).default;
+          if (!event.name) {
+            Logger.error(
+              `Lỗi khi load sự kiện ${file}: Không có thuộc tính name`
+            );
+          }
+          const res = this.events.add(event);
+          if (!res) {
+            Logger.error(`Lỗi khi load sự kiện ${file}: Sự kiện đã tồn tại!`);
+          } else {
+            Logger.info(`Đã load thành công sự kiện ${event.name} --> ${file}`);
+            cout++;
+          }
+        } catch (e) {
+          Logger.error("Lỗi khi load sự kiện " + file + ": " + e.message);
+          Logger.log(e);
         }
       }
     }

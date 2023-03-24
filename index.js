@@ -1,5 +1,6 @@
 import { Deploy } from "fca-dunnn-bot";
-import { Fs, Logger } from "fca-dunnn-bot/utils";
+import { Logger } from "./utils";
+import { Fs } from "./utils";
 import MyController from "./src/MyController";
 import MyHook from "./src/MyHook";
 class App extends Deploy {

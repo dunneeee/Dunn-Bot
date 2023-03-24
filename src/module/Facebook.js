@@ -1,9 +1,9 @@
 import { Fca } from "fca-dunnn-bot/src/namespaces/Fca";
 import UserDB, { formatUser } from "../database/User";
-import { Logger } from "fca-dunnn-bot/utils";
+import { Logger, Fs } from "../../utils";
 import ThreadDB, { formatThread } from "../database/Thread";
 import axios from "axios";
-// import qs from "qs";
+import qs from "qs";
 class Facebook {
   /**
    *
@@ -52,13 +52,22 @@ class Facebook {
   }
   static async getIdWithLink(link) {
     try {
-      const { data } = await axios.get("https://id.traodoisub.com/api.php", {
-        link,
-      });
-      console.log(data);
+      const { data } = await axios.post(
+        "https://id.traodoisub.com/api.php",
+        qs.stringify({ link })
+      );
+      if (data.code !== 200)
+        return Promise.reject("Có lỗi khi lấy id: " + data.error);
+      return data.id;
     } catch (e) {
       console.log(e);
+      return Promise.reject(" Có lỗi khi lấy id: " + e.message);
     }
+  }
+  static checkLinkProfileFacebook(link) {
+    if (!link) return false;
+    const regex = /https:\/\/(www.)*facebook.com\/(.*)/;
+    return regex.test(link);
   }
 }
 
