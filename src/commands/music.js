@@ -45,7 +45,7 @@ class Music extends Command {
       .join("\n");
     try {
       const info = await api.sendMessage(
-        `🎵 Kết quả tìm kiếm:\n ${Config.line}\n${text}`,
+        `🎵 Kết quả tìm kiếm:\n ${Config.line}\n${text}\n${Config.line}\n🔢 Vui lòng nhập số để chọn bài hát!`,
         event.threadID,
         event.messageID
       );

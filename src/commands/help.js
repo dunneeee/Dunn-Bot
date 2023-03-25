@@ -64,6 +64,7 @@ class Help extends Command {
       "📝 Để xem chi tiết lệnh, hãy sử dụng lệnh: " +
       prefix +
       "help <tên lệnh>\n";
+    text += "🔢 Hiện tại có " + allCommand.length + " lệnh\n";
     text +=
       page < totalPage
         ? "📖 Trang tiếp theo: " + prefix + "help " + (page + 1) + "\n"
