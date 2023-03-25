@@ -26,7 +26,11 @@ class Feedbank extends Command {
       const user = await UserDB.findOne({ id: event.senderID });
       const thread = await ThreadDB.findOne({ id: event.threadID });
       let text = `📬 Phản hồi từ ${user.name} (${event.senderID})\n`;
-      text += "🗒 Nhóm: " + (thread ? thread.name : "Không xác định") + "\n";
+      text +=
+        "🗒 Nhóm: " +
+        (thread ? thread.name : "Không xác định") +
+        thread.id +
+        "\n";
       text += "✉ Nội dung: " + content;
       await api.sendMessage(text, bot.ownerID);
       return "Đã gửi phản hồi thành công!";
