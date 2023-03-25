@@ -1,5 +1,5 @@
 class Config {
-  static line = "─────────────────";
+  static line = "────────────";
 }
 
 export default Config;

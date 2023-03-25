@@ -36,16 +36,19 @@ class Help extends Command {
       return `Không tìm thấy lệnh ${args[0]}`;
     }
     let text = "";
-    text += `- Tên lệnh: ${command.name}\n`;
-    text += `- Tác giả: ${command.author}\n`;
-    text += `- Mô tả: ${command.description}\n`;
-    text += `- Cách sử dụng: ${command.usage.replace(/<prefix>/gm, prefix)}\n`;
-    text += `- Quyền hạn: ${command.permission}\n`;
+    text += `📎Tên lệnh: ${command.name}\n`;
+    text += `👘 Tác giả: ${command.author}\n`;
+    text += `📃 Mô tả: ${command.description}\n`;
+    text += "⏰ Đếm ngược: " + command.cooldown / 1000 + " giây\n";
+    text += `🔒 Quyền hạn: ${command.permission}\n`;
+    text += Config.line + "\n";
+    text += `📖 Cách sử dụng: ${command.usage.replace(/<prefix>/gm, prefix)}\n`;
     return text;
   }
   getHelps(page, prefix) {
     const { controller } = this.tools;
-    let text = "Danh sách lệnh của bot:\n";
+    let text = "📚 Danh sách lệnh của bot:\n";
+    text += Config.line + "\n";
     const allCommand = controller.commands.values;
     if (page > Math.ceil(allCommand.length / this.pageSize))
       return this.getHelps(1, prefix);
@@ -53,14 +56,18 @@ class Help extends Command {
     const commands = MyArray.splitPage(allCommand, this.pageSize)[page - 1];
     for (let i = 0; i < commands.length; i++) {
       const command = commands[i];
-      text += `${i + 1}. ${command.name} - ${command.description}\n`;
+      text += `✏ ${prefix}${command.name} - ${command.description}\n`;
     }
     text += Config.line + "\n";
     text +=
-      "- Để xem chi tiết lệnh, hãy sử dụng lệnh: " +
+      "📝 Để xem chi tiết lệnh, hãy sử dụng lệnh: " +
       prefix +
       "help <tên lệnh>\n";
-    text += `- Trang [${page}/${totalPage}]`;
+    text +=
+      page < totalPage
+        ? "📖 Trang tiếp theo: " + prefix + "help " + (page + 1) + "\n"
+        : "";
+    text += `📄 Trang [${page}/${totalPage}]`;
     return text;
   }
 }

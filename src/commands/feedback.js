@@ -1,7 +1,7 @@
 import { Command } from "fca-dunnn-bot";
 import { CommandSpace } from "fca-dunnn-bot/src/namespaces";
 import { Logger } from "../../utils";
-
+import UserDB from "../database/User";
 class Feedbank extends Command {
   constructor() {
     super({
@@ -22,10 +22,9 @@ class Feedbank extends Command {
     if (args.length === 0) return "Vui lòng nhập nội dung phản hồi!";
     const content = args.join(" ");
     try {
-      const info = await api.sendMessage(
-        `📩 Phản hồi từ ${event.senderID}:\n${content}`,
-        bot.ownerID
-      );
+      const user = await UserDB.findOne({ id: event.senderID });
+      let text = `📩 Phản hồi từ ${user.name} (${user.id})\n\n${content}`;
+      await api.sendMessage(text, bot.ownerID);
       return "Đã gửi phản hồi thành công!";
     } catch (e) {
       Logger.error(e);

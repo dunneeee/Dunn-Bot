@@ -22,19 +22,19 @@ class Info extends Command {
   async onCall(params) {
     const { bot, uuid, controller } = this.tools;
     let info = "";
-    info += "Tên: " + bot.name + "\n";
-    info += "ID: " + uuid + "\n";
-    info += "Version: " + bot.version + "\n";
-    info += "Prefix: " + bot.prefix + "\n";
+    info += "📎Tên: " + bot.name + "\n";
+    info += "✉ ID: " + uuid + "\n";
+    info += "️🔖 Version: " + bot.version + "\n";
+    info += "️📝 Prefix: " + bot.prefix + "\n";
     info += Config.line + "\n";
-    info += "Owner: " + bot.owner + "\n";
-    info += "Owner ID: " + bot.ownerID + "\n";
+    info += "👘 Owner: " + bot.owner + "\n";
+    info += "️🏆 Owner ID: " + bot.ownerID + "\n";
     info += Config.line + "\n";
-    info += "Số lượng lệnh: " + controller.commands.size + "\n";
-    info += "Số nhóm: " + (await ThreadDB.count({})) + "\n";
-    info += "Số người dùng: " + (await UserDB.count({})) + "\n";
+    info += "📒 Số lượng lệnh: " + controller.commands.size + "\n";
+    info += "📕 Số nhóm: " + (await ThreadDB.count({})) + "\n";
+    info += "📗 Số người dùng: " + (await UserDB.count({})) + "\n";
     info += Config.line + "\n";
-    info += bot.description + "\n";
+    info += "📣 " + bot.description + "\n";
     return info;
   }
 }

@@ -1,8 +1,9 @@
 import { Command } from "fca-dunnn-bot";
 import { CommandSpace } from "fca-dunnn-bot/src/namespaces";
-import { Config, Fs } from "../../utils";
+import { Fs } from "../../utils";
 import { Request } from "../module";
 import { Logger } from "fca-dunnn-bot/utils";
+import OptionCmdDB from "../database/OptionCmd";
 
 class Weather extends Command {
   constructor() {
@@ -10,7 +11,8 @@ class Weather extends Command {
       name: "weather",
       author: "LT.Dũng",
       description: "Lấy thời tiết của một địa điểm",
-      usage: "<prefix>weather <địa điểm>",
+      usage:
+        "<prefix>weather <địa điểm>\n- Cấu hình địa điểm mặc định: <prefix>weather --set <địa điểm>\n- Xem địa điểm mặc định: <prefix>weather --get\n- Xóa địa điểm mặc định: <prefix>weather --del",
     });
     this.apiKey = this.getApiKey();
   }
@@ -21,36 +23,40 @@ class Weather extends Command {
   async onCall({ args, event }) {
     if (!this.apiKey || this.apiKey === "")
       return "Chưa có cấu hình API Key! Vui lòng liên hệ admin!";
-    if (args.length === 0) return "Vui lòng nhập địa điểm!";
-    const location = args.join(" ");
-    let data;
-    try {
-      data = await Request.getWeather(this.apiKey, location);
-    } catch (e) {
-      Logger.error(e);
-      return typeof e === "string" ? e : e.error || e.message;
+    if (args.length === 0) {
+      const threadOption = await OptionCmdDB.findOne({ id: event.threadID });
+      if (!threadOption?.weatherLocation)
+        return "Chưa cấu hình địa điểm mặc định! Gõ help để xem cách cấu hình!";
+      return await this.getObjectMessage(threadOption.weatherLocation);
     }
-    let text = "";
-    text += `🏡 Thời tiết tại ${data.name}:\n`;
-    text += Config.line + "\n";
-    text += `🌡️ Nhiệt độ: ${data.main.temp}°C\n`;
-    text += `🌡️ Nhiệt độ thấp nhất: ${data.main.temp_min}°C\n`;
-    text += `🌡️ Nhiệt độ cao nhất: ${data.main.temp_max}°C\n`;
-    text += Config.line + "\n";
-    text += `💦 Độ ẩm: ${data.main.humidity}%\n`;
-    text += `🌬️ Tốc độ gió: ${data.wind.speed}m/s\n`;
-    text += `🌤️ Thời tiết: ${data.weather.description}\n`;
-    const response = {
-      body: text,
-      attachment: [],
-    };
-    try {
-      const imgStream = await Fs.getStream(data.weather.iconLink);
-      response.attachment.push(imgStream);
-    } catch (e) {
-      Logger.error(e);
+    switch (args[0]) {
+      case "--set":
+        let lc = args.slice(1).join(" ");
+        try {
+          await Request.getWeather(this.apiKey, lc);
+        } catch (e) {
+          return "Có lỗi xảy ra hoặc địa điểm không tồn tại!";
+        }
+        await OptionCmdDB.update(
+          { id: event.threadID },
+          { $set: { weatherLocation: lc } },
+          { upsert: true }
+        );
+        return "Đã cấu hình địa điểm mặc định thành công! Địa điểm: " + lc;
+      case "--get":
+        const ops = await OptionCmdDB.findOne({ id: event.threadID });
+        if (!ops?.weatherLocation) return "Chưa cấu hình địa điểm mặc định!";
+        return "Địa điểm mặc định: " + ops.weatherLocation;
+      case "--del":
+        await OptionCmdDB.update(
+          { id: event.threadID },
+          { $unset: { weatherLocation: "" } }
+        );
+        return "Đã xóa địa điểm mặc định thành công!";
+      default:
+        const location = args.join(" ");
+        return await this.getObjectMessage(location);
     }
-    return response;
   }
 
   getApiKey() {
@@ -63,6 +69,22 @@ class Weather extends Command {
       return data;
     }
     return Fs.readJSON(path)?.weatherAPI || "";
+  }
+
+  async getObjectMessage(lactation) {
+    let data;
+    try {
+      data = await Request.getWeather(this.apiKey, lactation);
+    } catch (e) {
+      Logger.error(e);
+      return typeof e === "string" ? e : e.error || e.message;
+    }
+    let text = data.formatSring();
+    let img = await data.getStreamImg();
+    return {
+      body: text,
+      attachment: img ? [img] : [],
+    };
   }
 }
 

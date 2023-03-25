@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Logger } from "../../utils";
+import { Config, Fs, Logger } from "../../utils";
 class Request {
   static async getWeather(apiKey, cityName) {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
@@ -7,7 +7,10 @@ class Request {
     )}&appid=${apiKey}&units=metric&lang=vi`;
     try {
       const { data } = await axios.get(url);
-      if (data.cod !== 200) return Promise.reject(data.message);
+      if (data.cod !== 200) {
+        if (data.cod === 404) return Promise.reject("Không tìm thấy địa điểm!");
+        return Promise.reject(data.message);
+      }
       return {
         weather: {
           main: data.weather[0].main,
@@ -33,6 +36,27 @@ class Request {
           deg: data.wind.deg,
         },
         name: data.name,
+        formatSring() {
+          let text = "";
+          text += `🏡 Thời tiết tại ${this.name}:\n`;
+          text += Config.line + "\n";
+          text += `🌡️ Nhiệt độ: ${this.main.temp}°C\n`;
+          text += `🌡️ Nhiệt độ thấp nhất: ${this.main.temp_min}°C\n`;
+          text += `🌡️ Nhiệt độ cao nhất: ${this.main.temp_max}°C\n`;
+          text += Config.line + "\n";
+          text += `💦 Độ ẩm: ${this.main.humidity}%\n`;
+          text += `🌬️ Tốc độ gió: ${this.wind.speed}m/s\n`;
+          text += `🌤️ Thời tiết: ${this.weather.description}\n`;
+          return text;
+        },
+        async getStreamImg() {
+          try {
+            return await Fs.getStream(this.weather.iconLink);
+          } catch (e) {
+            Logger.error(e);
+            return null;
+          }
+        },
       };
     } catch (e) {
       Logger.error(e);

@@ -100,6 +100,8 @@ class Music extends Command {
       .catch(() => {})
       .finally(() => {
         Fs.removeFile(audioPath);
+        this.tools.controller.queueReply.delete(event.messageReply.messageID);
+        api.unsendMessage(event.messageReply.messageID).catch(() => {});
       });
   }
 

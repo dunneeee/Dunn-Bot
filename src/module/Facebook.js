@@ -50,6 +50,12 @@ class Facebook {
     }
     return null;
   }
+
+  async isAdminGroup(id, groupID) {
+    const { adminIDs } = await this.api.getThreadInfo(groupID);
+    return adminIDs.some((ad) => ad.id === id);
+  }
+
   static async getIdWithLink(link) {
     try {
       const { data } = await axios.post(

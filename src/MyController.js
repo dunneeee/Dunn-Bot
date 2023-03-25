@@ -155,7 +155,7 @@ class MyController extends Controller {
             if (resThread) {
               Logger.info(resThread);
             }
-            const nickname = `[${bot.prefix || "!"}] ● ${bot.name}`;
+            const nickname = `[ ${bot.prefix || "!"} ] • ${bot.name}`;
             await api.changeNickname(nickname, event.threadID, uuid);
             if (bot.description) {
               await message.reply(bot.description, event.threadID);
