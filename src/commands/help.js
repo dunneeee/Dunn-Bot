@@ -46,6 +46,7 @@ class Help extends Command {
     return text;
   }
   getHelps(page, prefix) {
+    if (typeof page !== "number") page = Number(page);
     const { controller } = this.tools;
     let text = "📚 Danh sách lệnh của bot:\n";
     text += Config.line + "\n";

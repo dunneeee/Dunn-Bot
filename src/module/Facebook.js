@@ -52,7 +52,8 @@ class Facebook {
   }
 
   async isAdminGroup(id, groupID) {
-    const { adminIDs } = await this.api.getThreadInfo(groupID);
+    const { adminIDs, isGroup } = await this.api.getThreadInfo(groupID);
+    if (!isGroup) return false;
     return adminIDs.some((ad) => ad.id === id);
   }
 
