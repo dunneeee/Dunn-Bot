@@ -26,6 +26,7 @@ export const formatThread = (info) => {
         timeUnBan: 0,
         exp: 0,
         level: 0,
+        isAdminBan: false,
       };
     }),
   };
