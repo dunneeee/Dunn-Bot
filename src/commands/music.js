@@ -76,6 +76,12 @@ class Music extends Command {
       return "Vui lòng nhập số từ 1 đến 6!";
     const { api } = this.tools;
     const { id, title, thumbnail, channel } = data[index];
+    this.tools.message.reply(
+      "🪄 Đang tải nhạc...",
+      event.threadID,
+      event.messageID
+    );
+    this.clearTemp(event.messageReply.messageID, event.senderID);
     let audioPath;
     try {
       audioPath = await this.youtube.getPathAudioStream(id);
@@ -103,8 +109,6 @@ class Music extends Command {
       .catch(() => {})
       .finally(() => {
         Fs.removeFile(audioPath);
-        this.clearTemp(event.messageReply.messageID, event.senderID);
-        this.temp.delete(event.senderID);
         api.unsendMessage(event.messageReply.messageID).catch(() => {});
       });
   }

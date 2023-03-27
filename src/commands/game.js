@@ -66,7 +66,7 @@ class Game extends Command {
       this.removeReply(event.messageReply.messageID);
       if (gameRes.state == "stop") {
         this.deleteUserPlaying(threadID, senderID);
-        if (gameRes.isWin) {
+        if (gameRes.isWin === true) {
           await UserDB.updateOne({ id: senderID }, { $inc: { money: 1000 } });
           gameRes.message += "\n 🎉 Bạn đã thắng và nhận được 1000coins!";
         } else {
