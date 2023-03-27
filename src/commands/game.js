@@ -37,7 +37,11 @@ class Game extends Command {
     const gameName = args[0].toLowerCase();
     if (this.isUserPlaying(threadID, senderID))
       return "❌ Bạn đang chơi game khác!";
-    if (gameName == "hungman") return await this.onHungmanGame({ event, args });
+    if (gameName == "hungman") {
+      const fcHandle = Hungman.onHungmanGame.bind(this);
+
+      return await fcHandle({ event, args });
+    }
 
     return "🥺 Không tìm thấy game này!";
   }

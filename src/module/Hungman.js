@@ -244,6 +244,53 @@ class Hungman extends Game {
     );
     return newWords;
   }
+
+  /**
+   *  Keywords this is class Game
+   * @param {CommandSpace.OnCallParams} param0
+   * @returns
+   */
+  static async onHungmanGame({ args, event }) {
+    const { controller, message, bot } = this.tools;
+    const { threadID, senderID } = event;
+    const words = args.splice(1);
+    const gameName = "hungman";
+    if (words.length && senderID == bot.ownerID) {
+      const ws = await Hungman.addWords(words.map((w) => w.toLowerCase()));
+      if (ws.length > 0)
+        return `✅ Đã thêm ${ws.join(", ")} từ vào cơ sở dữ liệu!`;
+      return "❌ Không có từ nào được thêm vào cơ sở dữ liệu!";
+    }
+    let thread = this.getThread(threadID);
+    if (!thread) {
+      let n = this.createNewThread(threadID);
+      thread = n;
+      this.threads.push(n);
+    }
+    if (!thread.game[gameName]) {
+      thread.game[gameName] = new Hungman(this.tools, threadID);
+    }
+    const game = thread.game[gameName];
+    const gameRes = await game.initGame(senderID);
+    if (!gameRes.status) return gameRes.message;
+    const info = await message.reply(
+      gameRes.message,
+      event.threadID,
+      event.messageID
+    );
+    this.addUserPlaying(threadID, senderID, gameName);
+    controller.queueReply.add(info.messageID, {
+      commandName: this.name,
+      author: senderID,
+    });
+    this.clearTimeoutGame(() => {
+      this.removeReply(info.messageID);
+    });
+    setTimeout(() => {
+      this.deleteUserPlaying(threadID, senderID);
+    }, 5 * 60 * 1000);
+    return;
+  }
 }
 
 export default Hungman;
