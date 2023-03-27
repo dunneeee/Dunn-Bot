@@ -1,7 +1,7 @@
 import Database from "nedb-promises";
 
 const GlobalDB = Database.create({
-  filename: "src/database/Global.db",
+  filename: "data/Global.db",
   autoload: true,
 });
 
