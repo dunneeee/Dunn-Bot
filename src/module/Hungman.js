@@ -2,16 +2,6 @@ import { Config, Game } from "../../utils";
 import { Fca } from "fca-dunnn-bot/src/namespaces";
 import GlobalDB from "../database/Global";
 
-class Player {
-  constructor(id, word) {
-    this.id = id;
-    this.word = word;
-    this.wrong = [];
-    this.corrects = [];
-    this.state = "playing";
-  }
-}
-
 class Hungman extends Game {
   constructor(tools, threadID) {
     super(tools, {
@@ -121,7 +111,13 @@ class Hungman extends Game {
   async createUser(id) {
     const word = await this.getRandomWord();
     if (!word) return null;
-    return new Player(id, word);
+    return {
+      id,
+      word,
+      wrongs: [],
+      corrects: [],
+      state: "playing",
+    };
   }
 
   addUser(user) {

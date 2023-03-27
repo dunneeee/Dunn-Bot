@@ -54,6 +54,9 @@ class Music extends Command {
         commandName: this.name,
         author: senderID,
       });
+      setTimeout(() => {
+        this.clearTemp(info.messageID, senderID);
+      }, 5 * 60 * 1000);
     } catch (e) {
       return typeof e === "string" ? e : e.error || e.message;
     }
@@ -100,7 +103,8 @@ class Music extends Command {
       .catch(() => {})
       .finally(() => {
         Fs.removeFile(audioPath);
-        this.tools.controller.queueReply.delete(event.messageReply.messageID);
+        this.clearTemp(event.messageReply.messageID, event.senderID);
+        this.temp.delete(event.senderID);
         api.unsendMessage(event.messageReply.messageID).catch(() => {});
       });
   }
@@ -111,6 +115,11 @@ class Music extends Command {
     const config = Fs.readJSON(path);
     if (!config) return null;
     return config.youtubeAPI;
+  }
+
+  clearTemp(messageID, senderID) {
+    this.temp.delete(senderID);
+    this.tools.controller.queueReply.delete(messageID);
   }
 }
 

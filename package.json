@@ -1,6 +1,6 @@
 {
   "name": "dunn-bot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Simple bot chat facebook messenger!",
   "main": "index.js",
   "scripts": {
