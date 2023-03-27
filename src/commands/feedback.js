@@ -3,6 +3,8 @@ import { CommandSpace } from "fca-dunnn-bot/src/namespaces";
 import { Logger } from "../../utils";
 import UserDB from "../database/User";
 import ThreadDB from "../database/Thread";
+import UserModel from "../database/Models/UserModel";
+import ThreadModel from "../database/Models/ThreadModel";
 class Feedbank extends Command {
   constructor() {
     super({
@@ -23,8 +25,10 @@ class Feedbank extends Command {
     if (args.length === 0) return "Vui lòng nhập nội dung phản hồi!";
     const content = args.join(" ");
     try {
-      const user = await UserDB.findOne({ id: event.senderID });
-      const thread = await ThreadDB.findOne({ id: event.threadID });
+      const user = new UserModel(await UserDB.findOne({ id: event.senderID }));
+      const thread = new ThreadModel(
+        await ThreadDB.findOne({ id: event.threadID })
+      );
       let text = `📬 Phản hồi từ ${user.name} (${event.senderID})\n`;
       text +=
         "🗒 Nhóm: " +

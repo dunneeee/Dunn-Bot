@@ -1,6 +1,9 @@
 import { Authen } from "fca-dunnn-bot";
 import { AuthenSpace } from "fca-dunnn-bot/src/namespaces";
 import { Config, Logger, Time } from "../utils";
+import BanModel from "./database/Models/BanModel";
+import ThreadModel from "./database/Models/ThreadModel";
+import UserModel from "./database/Models/UserModel";
 import ThreadDB from "./database/Thread";
 import UserDB from "./database/User";
 class MyAuthen extends Authen {
@@ -20,18 +23,19 @@ class MyAuthen extends Authen {
   async checkThreadBan(params) {
     const { event } = params;
     const threadID = event.threadID;
-    const thread = await ThreadDB.findOne({ id: threadID });
-    if (!event.isGroup || !thread)
+    const thread = new ThreadModel(await ThreadDB.findOne({ id: threadID }));
+    if (!event.isGroup || !thread.id)
       return {
         status: true,
         message: "Không tìm thấy thông tin nhóm!",
         type: params.name,
       };
-    if (thread.isBan) {
-      if (this.isUnBan(thread)) {
+    if (thread.banInfo.status) {
+      if (thread.banInfo.isOutTime()) {
+        thread.banInfo.setUnBan();
         await ThreadDB.update(
           { id: threadID },
-          { $set: { isBan: false, reasonBan: "", timeUnBan: 0 } }
+          { $set: thread.banInfo.getObject() }
         );
         return {
           status: true,
@@ -72,12 +76,13 @@ class MyAuthen extends Authen {
     const { event } = params;
     const threadID = event.threadID;
     const senderID = event.senderID;
-    const user = await UserDB.findOne({ id: senderID });
-    if (user && user.isBan) {
-      if (this.isUnBan(user)) {
+    const user = new UserModel(await UserDB.findOne({ id: senderID }));
+    if (user && user.banInfo.status) {
+      if (user.banInfo.isOutTime()) {
+        user.banInfo.setUnBan();
         await UserDB.update(
           { id: senderID },
-          { $set: { isBan: false, reasonBan: "", timeUnBan: 0 } }
+          { $set: user.banInfo.getObject() }
         );
         return {
           status: true,
@@ -92,7 +97,7 @@ class MyAuthen extends Authen {
         });
         return {
           status: false,
-          message: this.getMessageBan(user),
+          message: this.getMessageBan(user.banInfo),
           type: params.name,
         };
       }
@@ -108,19 +113,13 @@ class MyAuthen extends Authen {
         message: "Người dùng không bị cấm!",
         type: params.name,
       };
-    const thread = await ThreadDB.findOne({ id: threadID });
-    if (thread) {
-      const userInThread = thread?.users.find((e) => e.id == senderID);
-      if (userInThread && userInThread.isBan) {
-        if (this.isUnBan(userInThread)) {
-          const users = thread.users.map((e) => {
-            if (e.id === senderID) {
-              e.isBan = false;
-              e.reasonBan = "";
-              e.timeUnBan = 0;
-            }
-            return e;
-          });
+    const thread = new ThreadModel(await ThreadDB.findOne({ id: threadID }));
+    if (thread.id) {
+      const userInThread = thread.getUser(senderID);
+      if (userInThread && userInThread.banInfo.status) {
+        if (userInThread.banInfo.isOutTime()) {
+          userInThread.banInfo.setUnBan();
+          const users = thread.users.map((e) => e.getObject());
           await ThreadDB.update({ id: threadID }, { $set: { users } });
           return {
             status: true,
@@ -135,7 +134,7 @@ class MyAuthen extends Authen {
           });
           return {
             status: false,
-            message: this.getMessageBan(userInThread),
+            message: this.getMessageBan(userInThread.banInfo),
             type: params.name,
           };
         }
@@ -153,10 +152,6 @@ class MyAuthen extends Authen {
     };
   }
 
-  isUnBan({ timeUnBan }) {
-    return timeUnBan < Date.now();
-  }
-
   isSendNoti(id) {
     const index = this.wasSendNoti.findIndex((e) => e.id === id);
     if (index === -1) return false;
@@ -168,13 +163,19 @@ class MyAuthen extends Authen {
     return true;
   }
 
-  getMessageBan({ reasonBan, timeUnBan }) {
+  /**
+   *
+   * @param {BanModel} param0
+   * @returns
+   */
+  getMessageBan({ reasonBan, timeUnBan, author }) {
     let text = "";
     text += "⚠️ Bạn đã bị cấm sử dụng bot vì: " + reasonBan + "\n";
     text +=
       "⌛ Thời gian đếm ngược: " +
       Time.convertToTime(timeUnBan - Date.now()) +
       "\n";
+    text += "🪪 ID người cấm: " + author + "\n";
     text += Config.line + "\n";
     text += "📌 Nếu bạn muốn được bỏ cấm, vui lòng liên hệ admin!";
     return text;

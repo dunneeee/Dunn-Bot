@@ -1,9 +1,11 @@
 import { Fca } from "fca-dunnn-bot/src/namespaces/Fca";
-import UserDB, { formatUser } from "../database/User";
-import { Logger, Fs } from "../../utils";
-import ThreadDB, { formatThread } from "../database/Thread";
+import UserDB from "../database/User";
+import { Logger } from "../../utils";
+import ThreadDB from "../database/Thread";
 import axios from "axios";
 import qs from "qs";
+import ThreadModel from "../database/Models/ThreadModel";
+import UserModel from "../database/Models/UserModel";
 class Facebook {
   /**
    *
@@ -14,11 +16,11 @@ class Facebook {
   }
 
   async checkAndCreateUser(id) {
-    const userInDb = await UserDB.findOne({ id });
-    if (!userInDb) {
+    const userInDb = new UserModel(await UserDB.findOne({ id }));
+    if (!userInDb.id) {
       try {
         const info = (await this.api.getUserInfo(id))?.[id];
-        const user = formatUser({ id, info });
+        const user = UserModel.formatUser({ id, info });
         await UserDB.insert(user);
         return (
           "Đã tạo user thành công người dùng " + info.name + " (ID: " + id + ")"
@@ -33,11 +35,11 @@ class Facebook {
   }
 
   async checkAndCreateThread(id) {
-    const threadInDb = await ThreadDB.findOne({ id });
-    if (!threadInDb) {
+    const threadInDb = new ThreadModel(await ThreadDB.findOne({ id }));
+    if (!threadInDb.id) {
       try {
         const info = await this.api.getThreadInfo(id);
-        const thread = formatThread(info);
+        const thread = ThreadModel.formatThread(info);
         await ThreadDB.insert(thread);
         return (
           "Đã tạo thread thành công thread " + info.name + " (ID: " + id + ")"

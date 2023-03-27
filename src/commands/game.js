@@ -2,6 +2,7 @@ import { Command } from "fca-dunnn-bot";
 import { CommandSpace } from "fca-dunnn-bot/src/namespaces";
 import { Config, Game as GameUtil } from "../../utils";
 import Hungman from "../module/Hungman";
+import UserDB from "../database/User";
 class Game extends Command {
   constructor() {
     super({
@@ -102,6 +103,13 @@ class Game extends Command {
       this.removeReply(event.messageReply.messageID);
       if (gameRes.state == "stop") {
         this.deleteUserPlaying(threadID, senderID);
+        if (gameRes.isWin) {
+          await UserDB.updateOne({ id: senderID }, { $inc: { money: 1000 } });
+          gameRes.message += "\n 🎉 Bạn đã thắng và nhận được 1000coins!";
+        } else {
+          await UserDB.updateOne({ id: senderID }, { $inc: { money: -1000 } });
+          gameRes.message += "\n ☹️ Bạn đã thua và bị trừ 1000coins!";
+        }
         return gameRes.message;
       }
       const info = await message.reply(
