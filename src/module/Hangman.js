@@ -199,8 +199,8 @@ class Hangman {
       return words;
     }
     let newWords = [];
-    for (let w of data.words) {
-      if (!words.includes(w)) newWords.push(w);
+    for (let w of words) {
+      if (!data.words.includes(w)) newWords.push(w);
     }
     await GlobalDB.update(
       { name: "hangman" },

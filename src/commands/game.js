@@ -30,6 +30,13 @@ class Game extends Command {
       return this.getListGameName().replace(/<prefix>/g, prefix);
     }
     if (gameName == "hangman") {
+      if (args[1] && event.senderID == this.tools.bot.ownerID) {
+        const list = args.slice(1);
+        const resList = await Hangman.addWords(
+          list.map((k) => k.toLowerCase())
+        );
+        return `Đã thêm ${resList.length} từ vào database`;
+      }
       const user = new UserModel(await UserDB.findOne({ id: event.senderID }));
       const hangmanRes = await this.games.hangman.initGame(
         event.senderID,
@@ -56,6 +63,7 @@ class Game extends Command {
         default:
           throw new Error("Invalid response type!");
       }
+      return;
     }
 
     return "🚫 Game không tồn tại!";
