@@ -13,16 +13,25 @@ class Game {
    * @param {CommandSpace.Tools} tools
    * @param {{
    * name: string
-   * }} game
+   * }} name
    */
-  constructor(tools, game) {
-    this.tools = tools;
-    this.game = game;
+  constructor(name) {
+    this.tools = null;
+    this.name = name;
+    this.player = null;
+  }
+
+  setTools(tools) {
+    if (!this.tools) this.tools = tools;
+  }
+
+  setPlayer(player) {
+    this.player = player;
   }
 
   async startGame(event) {}
 
-  async initGame(event) {}
+  async initGame(senderID) {}
 }
 
 export default Game;

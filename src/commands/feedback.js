@@ -11,6 +11,7 @@ class Feedbank extends Command {
       name: "feedback",
       author: "LT.Dũng",
       usage: "<prefix>feedback <nội dung>",
+      description: "Gửi phản hồi cho người quản trị!",
     });
   }
 
